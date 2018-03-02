@@ -1,0 +1,18 @@
+files:
+    include: '**/*.css'
+rules:
+    indentation: 4
+    no-eol-whitespace: true
+    font-weight-notation:
+        - 'numeric'
+        - ignore: 'relative'
+    number-no-trailing-zeros: true
+    color-hex-case: 'upper'
+    unit-case: 'lower'
+    at-rule-name-case: 'lower'
+    selector-type-case: 'lower'
+    selector-max-class: 4
+    string-no-newline: true
+    string-quotes:
+        - 'single'
+        - avoidEscape: true
