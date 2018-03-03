@@ -105,6 +105,7 @@ function Crop(el) {
     }
 
     let start_drag = e => {
+        if (e.target.classList.contains('side')) return
         preview_inner.addEventListener('mousemove', drag_crop_area, false)
         document.addEventListener('mouseup', () => {
             preview_inner.removeEventListener('mousemove', drag_crop_area, false)
@@ -121,7 +122,6 @@ function Crop(el) {
             this.crop_area.top += deltaY
             this.crop_area.bottom -= deltaY
             _update_overlay()
-            console.log(deltaX, deltaY)
         }
         last_position = {
             x: e.clientX,
