@@ -63,7 +63,9 @@ function Crop(el) {
             index: Array.prototype.indexOf.call(e.target.parentElement.children, e.target) + 1
         }
         preview_inner.addEventListener('mousemove', click_move, false)
-        document.addEventListener('mouseup', click_up, false)
+        document.addEventListener('mouseup', () => {
+            preview_inner.removeEventListener('mousemove', click_move, false)
+        }, false)
         e.preventDefault()
         return false
     }
@@ -102,8 +104,29 @@ function Crop(el) {
         _update_overlay();
     }
 
-    let click_up = e => {
-        preview_inner.removeEventListener('mousemove', click_move, false)
+    let start_drag = e => {
+        preview_inner.addEventListener('mousemove', drag_crop_area, false)
+        document.addEventListener('mouseup', () => {
+            preview_inner.removeEventListener('mousemove', drag_crop_area, false)
+        }, false)
+    }
+
+    var last_position
+    let drag_crop_area = e => {
+        if (last_position) {
+            let deltaX = e.clientX - last_position.x,
+                deltaY = e.clientY - last_position.y
+            this.crop_area.left += deltaX
+            this.crop_area.right -= deltaX
+            this.crop_area.top += deltaY
+            this.crop_area.bottom -= deltaY
+            _update_overlay()
+            console.log(deltaX, deltaY)
+        }
+        last_position = {
+            x: e.clientX,
+            y: e.clientY
+        }
     }
 
     /* Bind events */
@@ -111,6 +134,7 @@ function Crop(el) {
         upload_btn.addEventListener('click', choose_image, false)
         remove_btn.addEventListener('click', remove_preview, false)
         input.addEventListener('change', show_preview, false)
+        crop_overlay.addEventListener('mousedown', start_drag, false)
     }
 
     let _update_overlay = () => {
