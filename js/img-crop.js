@@ -109,6 +109,7 @@ function Crop(el) {
         preview_inner.addEventListener('mousemove', drag_crop_area, false)
         document.addEventListener('mouseup', () => {
             preview_inner.removeEventListener('mousemove', drag_crop_area, false)
+            last_position = null
         }, false)
     }
 
@@ -129,19 +130,38 @@ function Crop(el) {
         }
     }
 
+    let _update_overlay = () => {
+        crop_overlay.style.left = this.crop_area.left + 'px';
+        crop_overlay.style.top = this.crop_area.top + 'px';
+        crop_overlay.style.width = (preview_inner.clientWidth - this.crop_area.left - this.crop_area.right) + 'px';
+        crop_overlay.style.height = (preview_inner.clientHeight - this.crop_area.top - this.crop_area.bottom) + 'px';
+    }
+
+    /* Limit calls to a function */
+    let throttle = (callback, limit) => {
+        let wait = false
+        return () => {
+            if (!wait) {
+                callback.apply(null, arguments)
+                wait = true
+                setTimeout(() => {
+                    wait = false
+                }, limit)
+            }
+        }
+    }
+
     /* Bind events */
     let bind_events = () => {
         upload_btn.addEventListener('click', choose_image, false)
         remove_btn.addEventListener('click', remove_preview, false)
         input.addEventListener('change', show_preview, false)
         crop_overlay.addEventListener('mousedown', start_drag, false)
-    }
-
-    let _update_overlay = () => {
-        crop_overlay.style.left = this.crop_area.left + 'px';
-        crop_overlay.style.top = this.crop_area.top + 'px';
-        crop_overlay.style.width = (preview_inner.clientWidth - this.crop_area.left - this.crop_area.right) + 'px';
-        crop_overlay.style.height = (preview_inner.clientHeight - this.crop_area.top - this.crop_area.bottom) + 'px';
+        window.addEventListener('resize', throttle(() => {
+            _update_offset()
+            _update_overlay()
+            last_position = null
+        }, 50), false)
     }
 
 
@@ -163,6 +183,7 @@ function Crop(el) {
         } else {
             img_el.addEventListener('load', _update_overlay)
         }
+
         bind_events()
     })()
 
