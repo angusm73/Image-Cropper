@@ -2,6 +2,7 @@
 JS + PHP image cropping system
 
 Basic image cropping system using a client side preview. Image manipulation will be handled with PHP.
+### [Demo](https://angusm73.github.io/)
 ![Early example](https://i.imgur.com/lYuqUaQ.png)
 
 This project uses a build folder called ../dist/
