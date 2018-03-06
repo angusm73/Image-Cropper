@@ -1,23 +1,34 @@
-function Crop(el) {
+function Crop(options) {
 
     /* Get DOM node from selector */
-    this.element = document.querySelector(el)
+    this.element = document.querySelector(typeof options == 'object' ? options.element : options)
+    var self = this
 
     /* Get all other elements */
     let upload_btn = this.element.querySelector('.upload-btn')
     let remove_btn = this.element.querySelector('.remove-btn')
-    let input = this.element.querySelector('input[type=file].hidden')
+    let form = this.element.querySelector('form')
+    let input = form.querySelector('input[type=file].hidden')
     let preview = this.element.querySelector('.crop-preview')
     let preview_inner = preview.querySelector('.crop-inner')
     let img_el = preview_inner.querySelector('img')
     let crop_overlay = document.createElement('div')
 
+    /* Get preview if set */
+    if (options.preview) {
+        this.preview = document.querySelector(options.preview)
+    }
+
+    /* Debuggging... */
     this.crop_area = {
         top: 40,
         bottom: 50,
         left: 40,
         right: 400
     }
+    /* End debugging... */
+
+
 
     /* Open file browser */
     let choose_image = () => {
@@ -56,6 +67,14 @@ function Crop(el) {
         this.element.querySelector('form').appendChild(input)
     }
 
+    /* Ajax update preview of processed image */
+    // let update_preview = () => {
+    //     if (!this.preview) return
+    //     fetch(form.action).then((response) => {
+    //         this.preview.innerHtml = response
+    //     })
+    // }
+
     var cur_side
     let click_down = e => {
         cur_side = {
@@ -63,9 +82,6 @@ function Crop(el) {
             index: Array.prototype.indexOf.call(e.target.parentElement.children, e.target) + 1
         }
         preview_inner.addEventListener('mousemove', click_move, false)
-        document.addEventListener('mouseup', () => {
-            preview_inner.removeEventListener('mousemove', click_move, false)
-        }, false)
         e.preventDefault()
         return false
     }
@@ -74,7 +90,7 @@ function Crop(el) {
         _update_offset = () => {
             preview_offset = preview_inner.getBoundingClientRect()
         }
-    setTimeout(_update_offset, 100);
+    setTimeout(_update_offset, 100)
     let click_move = e => {
         if (cur_side.index == 1) {
             // Top
@@ -101,16 +117,12 @@ function Crop(el) {
                 this.crop_area.right = _right
             }
         }
-        _update_overlay();
+        _update_overlay()
     }
 
     let start_drag = e => {
         if (e.target.classList.contains('side')) return
         preview_inner.addEventListener('mousemove', drag_crop_area, false)
-        document.addEventListener('mouseup', () => {
-            preview_inner.removeEventListener('mousemove', drag_crop_area, false)
-            last_position = null
-        }, false)
     }
 
     var last_position
@@ -131,10 +143,22 @@ function Crop(el) {
     }
 
     let _update_overlay = () => {
-        crop_overlay.style.left = this.crop_area.left + 'px';
-        crop_overlay.style.top = this.crop_area.top + 'px';
-        crop_overlay.style.width = (preview_inner.clientWidth - this.crop_area.left - this.crop_area.right) + 'px';
-        crop_overlay.style.height = (preview_inner.clientHeight - this.crop_area.top - this.crop_area.bottom) + 'px';
+        crop_overlay.style.left = this.crop_area.left + 'px'
+        crop_overlay.style.top = this.crop_area.top + 'px'
+        crop_overlay.style.width = (preview_inner.clientWidth - this.crop_area.left - this.crop_area.right) + 'px'
+        crop_overlay.style.height = (preview_inner.clientHeight - this.crop_area.top - this.crop_area.bottom) + 'px'
+    }
+
+    let _update_preview = () => {
+        fetch('/preview', {}).then(response => {
+            response.text().then(base64_preview => {
+                if (!this.preview_img) {
+                    this.preview_img = document.createElement('img')
+                    this.preview.appendChild(this.preview_img)
+                }
+                this.preview_img.src = 'data:image/jpeg;base64,' + base64_preview
+            })
+        })
     }
 
     /* Limit calls to a function */
@@ -157,6 +181,12 @@ function Crop(el) {
         remove_btn.addEventListener('click', remove_preview, false)
         input.addEventListener('change', show_preview, false)
         crop_overlay.addEventListener('mousedown', start_drag, false)
+        document.addEventListener('mouseup', () => {
+            last_position = null
+            preview_inner.removeEventListener('mousemove', click_move, false)
+            preview_inner.removeEventListener('mousemove', drag_crop_area, false)
+            _update_preview()
+        }, false)
         window.addEventListener('resize', throttle(() => {
             _update_offset()
             _update_overlay()
