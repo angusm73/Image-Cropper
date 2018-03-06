@@ -11,7 +11,7 @@
 
 /* Overlay */
 .crop-inner         { position: relative; overflow: hidden; }
-.crop-overlay       { position: absolute; border: 1px solid rgba(255,255,255,0.75); box-shadow: 0 0 2000px 2000px rgba(0,0,0,.4); cursor: move; }
+.crop-overlay       { position: absolute; border: 1px solid rgba(255,255,255,0.75); box-shadow: 0 0 2000px 2000px rgba(0,0,0,.4); cursor: move; will-change: width, height, left, right; }
 .crop-overlay .side { position: inherit; background: rgba(255,255,255,.25); }
 .crop-overlay .side:nth-of-type(1),
 .crop-overlay .side:nth-of-type(3) { left: -7px; right: -7px; height: 14px; cursor: ns-resize; }

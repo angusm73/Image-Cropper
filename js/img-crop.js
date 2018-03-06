@@ -1,26 +1,37 @@
 'use strict';
 
-function Crop(el) {
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function Crop(options) {
     var _this = this,
         _arguments = arguments;
 
     /* Get DOM node from selector */
-    this.element = document.querySelector(el);
+    this.element = document.querySelector((typeof options === 'undefined' ? 'undefined' : _typeof(options)) == 'object' ? options.element : options);
+    var self = this;
 
     /* Get all other elements */
     var upload_btn = this.element.querySelector('.upload-btn');
     var remove_btn = this.element.querySelector('.remove-btn');
-    var input = this.element.querySelector('input[type=file].hidden');
+    var form = this.element.querySelector('form');
+    var input = form.querySelector('input[type=file].hidden');
     var preview = this.element.querySelector('.crop-preview');
     var preview_inner = preview.querySelector('.crop-inner');
     var img_el = preview_inner.querySelector('img');
     var crop_overlay = document.createElement('div');
 
+    /* Get preview if set */
+    if (options.preview) {
+        this.preview = document.querySelector(options.preview);
+    }
+
+    /* Debuggging... */
     this.crop_area = {
         top: 40,
         bottom: 50,
         left: 40,
         right: 400
+        /* End debugging... */
 
         /* Open file browser */
     };var choose_image = function choose_image() {
@@ -59,6 +70,14 @@ function Crop(el) {
         _this.element.querySelector('form').appendChild(input);
     };
 
+    /* Ajax update preview of processed image */
+    // let update_preview = () => {
+    //     if (!this.preview) return
+    //     fetch(form.action).then((response) => {
+    //         this.preview.innerHtml = response
+    //     })
+    // }
+
     var cur_side;
     var click_down = function click_down(e) {
         cur_side = {
@@ -66,9 +85,6 @@ function Crop(el) {
             index: Array.prototype.indexOf.call(e.target.parentElement.children, e.target) + 1
         };
         preview_inner.addEventListener('mousemove', click_move, false);
-        document.addEventListener('mouseup', function () {
-            preview_inner.removeEventListener('mousemove', click_move, false);
-        }, false);
         e.preventDefault();
         return false;
     };
@@ -110,10 +126,6 @@ function Crop(el) {
     var start_drag = function start_drag(e) {
         if (e.target.classList.contains('side')) return;
         preview_inner.addEventListener('mousemove', drag_crop_area, false);
-        document.addEventListener('mouseup', function () {
-            preview_inner.removeEventListener('mousemove', drag_crop_area, false);
-            last_position = null;
-        }, false);
     };
 
     var last_position;
@@ -140,6 +152,18 @@ function Crop(el) {
         crop_overlay.style.height = preview_inner.clientHeight - _this.crop_area.top - _this.crop_area.bottom + 'px';
     };
 
+    var _update_preview = function _update_preview() {
+        fetch('/preview', {}).then(function (response) {
+            response.text().then(function (base64_preview) {
+                if (!_this.preview_img) {
+                    _this.preview_img = document.createElement('img');
+                    _this.preview.appendChild(_this.preview_img);
+                }
+                _this.preview_img.src = 'data:image/jpeg;base64,' + base64_preview;
+            });
+        });
+    };
+
     /* Limit calls to a function */
     var throttle = function throttle(callback, limit) {
         var wait = false;
@@ -160,6 +184,12 @@ function Crop(el) {
         remove_btn.addEventListener('click', remove_preview, false);
         input.addEventListener('change', show_preview, false);
         crop_overlay.addEventListener('mousedown', start_drag, false);
+        document.addEventListener('mouseup', function () {
+            last_position = null;
+            preview_inner.removeEventListener('mousemove', click_move, false);
+            preview_inner.removeEventListener('mousemove', drag_crop_area, false);
+            _update_preview();
+        }, false);
         window.addEventListener('resize', throttle(function () {
             _update_offset();
             _update_overlay();
