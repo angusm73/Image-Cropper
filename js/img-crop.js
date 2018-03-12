@@ -26,10 +26,10 @@ function Crop(options) {
 
     /* Debuggging... */
     this.crop_area = {
-        top: 40,
-        bottom: 50,
-        left: 40,
-        right: 400
+        left: 20,
+        top: 20,
+        width: 250,
+        height: 80
         /* End debugging... */
 
         /* Open file browser */
@@ -75,7 +75,7 @@ function Crop(options) {
             el: e.target,
             index: Array.prototype.indexOf.call(e.target.parentElement.children, e.target) + 1
         };
-        preview_inner.addEventListener('mousemove', click_move, false);
+        document.addEventListener('mousemove', click_move, false);
         e.preventDefault();
         return false;
     };
@@ -84,31 +84,34 @@ function Crop(options) {
         _update_offset = function _update_offset() {
         preview_offset = preview_inner.getBoundingClientRect();
     };
-    setTimeout(_update_offset, 100);
     function click_move(e) {
         if (cur_side.index == 1) {
             // Top
-            var _top = Math.round(e.pageY - preview_offset.top);
-            if (_top < preview_inner.clientHeight - this.crop_area.bottom && _top > 0) {
-                this.crop_area.top = _top;
+            var _top = e.pageY - preview_offset.top;
+            if (_top < preview_inner.clientHeight && _top > 0) {
+                var _old_top = self.crop_area.top;
+                self.crop_area.top = Math.round(_top);
+                self.crop_area.height -= self.crop_area.top - _old_top;
             }
         } else if (cur_side.index == 3) {
             // Bottom
-            var _bottom = Math.round(preview_offset.top + preview_inner.clientHeight - e.pageY);
-            if (_bottom < preview_inner.clientHeight - this.crop_area.top && _bottom > 0) {
-                this.crop_area.bottom = _bottom;
+            var _bottom = preview_offset.top + preview_inner.clientHeight - e.pageY;
+            if (_bottom < preview_inner.clientHeight - self.crop_area.top && _bottom > 0) {
+                self.crop_area.height = Math.round(preview_inner.clientHeight - self.crop_area.top - _bottom);
             }
         } else if (cur_side.index == 4) {
             // Left
-            var _left = Math.round(e.pageX - preview_offset.left);
-            if (_left < preview_inner.clientWidth - this.crop_area.right && _left > 0) {
-                this.crop_area.left = _left;
+            var _left = e.pageX - preview_offset.left;
+            if (_left < preview_inner.clientWidth && _left > 0) {
+                var _old_left = self.crop_area.left;
+                self.crop_area.left = Math.round(_left);
+                self.crop_area.width -= self.crop_area.left - _old_left;
             }
         } else {
             // Right
-            var _right = Math.round(preview_offset.left + preview_inner.clientWidth - e.pageX);
-            if (_right < preview_inner.clientWidth - this.crop_area.left && _right > 0) {
-                this.crop_area.right = _right;
+            var _right = preview_offset.left + preview_inner.clientWidth - e.pageX;
+            if (_right < preview_inner.clientWidth - self.crop_area.left && _right > 0) {
+                self.crop_area.width = Math.round(preview_inner.clientWidth - self.crop_area.left - _right);
             }
         }
         _update_overlay();
@@ -117,12 +120,19 @@ function Crop(options) {
     var last_position;
     function drag_crop_area(e) {
         if (last_position) {
+            /* Get new crop position */
             var deltaX = e.clientX - last_position.x,
-                deltaY = e.clientY - last_position.y;
-            self.crop_area.left += deltaX;
-            self.crop_area.right -= deltaX;
-            self.crop_area.top += deltaY;
-            self.crop_area.bottom -= deltaY;
+                deltaY = e.clientY - last_position.y,
+                new_pos = {
+                left: self.crop_area.left + deltaX < 0 ? 0 : self.crop_area.left + deltaX,
+                top: self.crop_area.top + deltaY < 0 ? 0 : self.crop_area.top + deltaY
+
+                /* Restrict to inside crop area */
+            };if (new_pos.left >= preview_inner.clientWidth - self.crop_area.width) new_pos.left = self.crop_area.left;
+            if (new_pos.top >= preview_inner.clientHeight - self.crop_area.height) new_pos.top = self.crop_area.top;
+
+            /* Update overlay then render */
+            self.crop_area = Object.assign(self.crop_area, new_pos);
             _update_overlay();
         }
         last_position = {
@@ -134,10 +144,11 @@ function Crop(options) {
     function _update_overlay() {
         crop_overlay.style.left = self.crop_area.left + 'px';
         crop_overlay.style.top = self.crop_area.top + 'px';
-        crop_overlay.style.width = preview_inner.clientWidth - self.crop_area.left - self.crop_area.right + 'px';
-        crop_overlay.style.height = preview_inner.clientHeight - self.crop_area.top - self.crop_area.bottom + 'px';
+        crop_overlay.style.width = self.crop_area.width + 'px';
+        crop_overlay.style.height = self.crop_area.height + 'px';
     }
 
+    /* Fetch cropped image preview from server */
     function _update_preview() {
         var options = {
             method: 'POST',
@@ -180,12 +191,12 @@ function Crop(options) {
         input.addEventListener('change', show_preview, false);
         crop_overlay.addEventListener('mousedown', function (e) {
             if (e.target.classList.contains('side')) return;
-            preview_inner.addEventListener('mousemove', drag_crop_area, false);
+            document.addEventListener('mousemove', drag_crop_area, false);
         }, false);
         document.addEventListener('mouseup', function () {
             last_position = null;
-            preview_inner.removeEventListener('mousemove', click_move, false);
-            preview_inner.removeEventListener('mousemove', drag_crop_area, false);
+            document.removeEventListener('mousemove', click_move, false);
+            document.removeEventListener('mousemove', drag_crop_area, false);
             _update_preview();
         }, false);
         window.addEventListener('resize', throttle(function () {
@@ -210,7 +221,9 @@ function Crop(options) {
             img_el = document.createElement('img');
             preview_inner.appendChild(img_el);
         } else {
+            img_el.addEventListener('load', _update_offset);
             img_el.addEventListener('load', _update_overlay);
+            img_el.addEventListener('load', _update_preview);
         }
 
         bind_events();
