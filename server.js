@@ -27,7 +27,7 @@ app.get('/', function (request, response) {
 })
 
 /* Load preview */
-const load_preview = require(__dirname + '/load-preview.js')
+const load_preview = require(__dirname + '/crop-image.js')
 app.post('/preview', function (request, response) {
     let img_data = load_preview.generate(request.body)
         .then(data => {

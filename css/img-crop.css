@@ -3,8 +3,8 @@
 .btn.remove-btn     { position: absolute; top: 20px; right: 20px; z-index: 2; }
 
 /* Image */
-.crop-preview       { position: relative; padding: 15px; background: #EFEFEF; }
-.crop-preview img   { width: 100%; }
+.crop-preview       { position: relative; display: inline-block; padding: 15px; background: #EFEFEF; user-select: none; }
+.crop-preview img   { display: block; }
 .crop-preview:not(.no-img) p    { margin-bottom: 10px; }
 .crop-preview.no-img .remove-btn,
 .crop-preview.no-img img        { display: none; }
