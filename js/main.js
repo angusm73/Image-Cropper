@@ -1,10 +1,16 @@
-var cropper;
+var croppers
 
 /* Init image cropper on DOM ready */
 document.addEventListener('DOMContentLoaded', () => {
-    cropper = new Crop({
-        element: '.crop-holder',
-        preview: '.img-preview'
-    })
-    console.log(cropper)
+    croppers = [
+        new Crop({
+            element: '#crop1',
+            preview: '#preview1'
+        }),
+        new Crop({
+            element: '#crop2',
+            preview: '#preview2'
+        })
+    ]
+    console.log(croppers)
 }, false)

@@ -4,15 +4,8 @@ function Crop(options) {
     this.element = document.querySelector(typeof options == 'object' ? options.element : options)
     var self = this
 
-    /* Get all other elements */
-    let upload_btn = this.element.querySelector('.upload-btn')
-    let remove_btn = this.element.querySelector('.remove-btn')
-    let form = this.element.querySelector('form')
-    let input = form.querySelector('input[type=file].hidden')
-    let preview = this.element.querySelector('.crop-preview')
-    let preview_inner = preview.querySelector('.crop-inner')
-    let img_el = preview_inner.querySelector('img')
-    let crop_overlay = document.createElement('div')
+    /* Scope all elements */
+    let upload_btn, remove_btn, form, input, preview, preview_inner, img_el, crop_overlay
 
     /* Get preview if set */
     if (options.preview) {
@@ -140,6 +133,7 @@ function Crop(options) {
         }
     }
 
+    /* Update overlay dimensions */
     function _update_overlay() {
         crop_overlay.style.left = self.crop_area.left + 'px'
         crop_overlay.style.top = self.crop_area.top + 'px'
@@ -183,8 +177,68 @@ function Crop(options) {
         }
     }
 
+    /* Generate markup for img cropper */
+    function generate_crop_template() {
+        /* Upload button */
+        upload_btn = document.createElement('button')
+        upload_btn.classList.add('btn')
+        upload_btn.classList.add('upload-btn')
+        upload_btn.innerHTML = "Upload Image"
+
+        /* Remove button */
+        remove_btn = document.createElement('button')
+        remove_btn.classList.add('btn')
+        remove_btn.classList.add('remove-btn')
+        remove_btn.innerHTML = "Remove"
+
+        /* Form */
+        input = document.createElement('input')
+        input.type = 'file'
+        input.classList.add('hidden')
+        form = document.createElement('form')
+        form.action = "/upload-file"
+        form.appendChild(input)
+
+        /* Image preview */
+        preview = document.createElement('div')
+        preview.classList.add('crop-preview')
+        preview_inner = document.createElement('div')
+        preview_inner.classList.add('crop-inner')
+        let _placeholder = document.createElement('p')
+        _placeholder.classList.add('hidden')
+        _placeholder.textContent = "Please choose an image to start cropping..."
+        preview.appendChild(_placeholder)
+        preview.appendChild(remove_btn)
+        preview.appendChild(preview_inner)
+
+        /* Image */
+        img_el = document.createElement('img')
+        img_el.src = "/test.png"
+        img_el.alt = "crop preview"
+        preview_inner.appendChild(img_el)
+
+        /* Crop area */
+        crop_overlay = document.createElement('div')
+        crop_overlay.classList.add('crop-overlay')
+        for (let i = 4; i > 0; i--) {
+            let side = document.createElement('div')
+            side.classList.add('side')
+            side.addEventListener('mousedown', click_down, false)
+            crop_overlay.appendChild(side)
+        }
+        preview_inner.appendChild(crop_overlay)
+
+        /* Append everything to self.element */
+        self.element.appendChild(upload_btn)
+        self.element.appendChild(preview)
+        self.element.appendChild(form)
+    }
+
     /* Bind events */
     function bind_events() {
+        img_el.addEventListener('load', _update_offset)
+        img_el.addEventListener('load', _update_overlay)
+        img_el.addEventListener('load', _update_preview)
         upload_btn.addEventListener('click', choose_image, false)
         remove_btn.addEventListener('click', remove_preview, false)
         input.addEventListener('change', show_preview, false)
@@ -207,29 +261,13 @@ function Crop(options) {
 
 
 
-    /* Initialise preview */
+    /* Initialise Crop */
     (() => {
-        for (let i = 4; i > 0; i--) {
-            let side = document.createElement('div')
-            side.classList.add('side')
-            side.addEventListener('mousedown', click_down, false)
-            crop_overlay.appendChild(side)
-        }
-        crop_overlay.classList.add('crop-overlay')
-
-        preview_inner.appendChild(crop_overlay)
-        if (!img_el) {
-            img_el = document.createElement('img')
-            preview_inner.appendChild(img_el)
-        } else {
-            img_el.addEventListener('load', _update_offset)
-            img_el.addEventListener('load', _update_overlay)
-            img_el.addEventListener('load', _update_preview)
-        }
-
+        generate_crop_template()
         bind_events()
     })()
 
+    /* Public functions */
     this.choose_image = choose_image
 
     return this

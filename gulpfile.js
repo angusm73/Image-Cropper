@@ -10,6 +10,12 @@ gulp.task('html', () => {
     gulp.src('**.htm')
         .pipe(gulp.dest('../dist'))
         .pipe(server.notify())
+    gulp.src('**.png')
+        .pipe(gulp.dest('../dist'))
+        .pipe(server.notify())
+    gulp.src('**.jpg')
+        .pipe(gulp.dest('../dist'))
+        .pipe(server.notify())
 })
 
 gulp.task('css', () => {
