@@ -24,23 +24,17 @@
 
             <h3 class="sub-heading">Image Cropping System</h3>
 
-            <!-- CROP IMAGE FORM -->
-            <div class="crop-holder">
-                <button class="btn upload-btn">Upload Image</button>
-                <div class="crop-preview">
-                    <p class="hidden">Please choose an image to start cropping...</p>
-                    <button class="btn remove-btn">Remove</button>
-                    <div class="crop-inner">
-                        <img src="https://www.google.com.au/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" alt="preview" />
-                    </div>
-                </div>
-                <form action="/upload-file">
-                    <input type="file" class="hidden" />
-                </form>
+            <!-- IMAGE CROPPER -->
+            <div class="cropper">
+                <div id="crop1"></div>
+                <div id="preview1"></div>
             </div>
 
-            <!-- PREVIEW -->
-            <div class="img-preview"></div>
+            <!-- SECOND IMAGE CROPPER -->
+            <div class="cropper">
+                <div id="crop2"></div>
+                <div id="preview2"></div>
+            </div>
 
         </div>
     </div>
