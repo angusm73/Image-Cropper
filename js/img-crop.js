@@ -1,30 +1,25 @@
 function Crop(options) {
-
-    /* Get DOM node from selector */
-    this.element = document.querySelector(typeof options == 'object' ? options.element : options)
     var self = this
 
     /* Scope all elements */
     let upload_btn, remove_btn, form, input, preview, preview_inner, img_el, crop_overlay
+
+    /* Get DOM node from selector */
+    this.element = document.querySelector(typeof options == 'object' ? options.element : options)
 
     /* Get preview if set */
     if (options.preview) {
         this.preview = document.querySelector(options.preview)
     }
 
-    /* Debuggging... */
-    this.crop_area = {
-        left: 20,
-        top: 20,
-        width: 250,
-        height: 80
-    }
-    /* End debugging... */
 
 
+    /* ---------------- */
+    /*  Crop Functions  */
+    /* ---------------- */
 
     /* Open file browser */
-    let choose_image = () => {
+    function choose_image() {
         input.dispatchEvent(new MouseEvent('click', {
             view: window,
             bubbles: true,
@@ -32,8 +27,8 @@ function Crop(options) {
         }))
     }
 
-    /* SHOW image preview */
-    let show_preview = () => {
+    /* Show image preview */
+    function show_preview() {
         if (input.files && input.files[0]) {
             let reader = new FileReader()
             reader.onload = (e) => {
@@ -47,8 +42,8 @@ function Crop(options) {
         _update_offset()
     }
 
-    /* REMOVE image preview */
-    let remove_preview = () => {
+    /* Remove image preview */
+    function remove_preview() {
         img_el.style.display = 'none'
         preview.classList.add('no-img')
         preview.children[0].classList.remove('hidden')
@@ -57,11 +52,11 @@ function Crop(options) {
         input.type = 'file'
         input.classList.add('hidden')
         input.addEventListener('change', show_preview, false)
-        this.element.querySelector('form').appendChild(input)
+        self.element.querySelector('form').appendChild(input)
     }
 
     var cur_side
-    let click_down = e => {
+    function click_down(e) {
         cur_side = {
             el: e.target,
             index: Array.prototype.indexOf.call(e.target.parentElement.children, e.target) + 1
@@ -71,14 +66,22 @@ function Crop(options) {
         return false
     }
 
-    var preview_offset,
-        _update_offset = () => {
-            preview_offset = preview_inner.getBoundingClientRect()
+    function _update_offset() {
+        /* Set initial crop area */
+        if (typeof self.crop_area == 'undefined') {
+            self.crop_area = {
+                left: convert_to_px(options.area ? options.area.left : '10px', img_el.clientWidth),
+                top: convert_to_px(options.area ? options.area.top : '10px', img_el.clientHeight),
+                width: convert_to_px(options.area ? options.area.width : '50px', img_el.clientWidth),
+                height: convert_to_px(options.area ? options.area.height : '50px', img_el.clientHeight)
+            }
         }
+        self.preview_offset = preview_inner.getBoundingClientRect()
+    }
     function click_move(e) {
         if (cur_side.index == 1) {
             // Top
-            let _top = e.pageY - preview_offset.top
+            let _top = e.pageY - self.preview_offset.top
             if (_top < preview_inner.clientHeight && _top > 0) {
                 let _old_top = self.crop_area.top
                 self.crop_area.top = Math.round(_top)
@@ -86,13 +89,13 @@ function Crop(options) {
             }
         } else if (cur_side.index == 3) {
             // Bottom
-            let _bottom = (preview_offset.top + preview_inner.clientHeight) - e.pageY
+            let _bottom = (self.preview_offset.top + preview_inner.clientHeight) - e.pageY
             if (_bottom < preview_inner.clientHeight - self.crop_area.top && _bottom > 0) {
                 self.crop_area.height = Math.round(preview_inner.clientHeight - self.crop_area.top - _bottom)
             }
         } else if (cur_side.index == 4) {
             // Left
-            let _left = e.pageX - preview_offset.left
+            let _left = e.pageX - self.preview_offset.left
             if (_left < preview_inner.clientWidth && _left > 0) {
                 let _old_left = self.crop_area.left
                 self.crop_area.left = Math.round(_left)
@@ -100,7 +103,7 @@ function Crop(options) {
             }
         } else {
             // Right
-            let _right = (preview_offset.left + preview_inner.clientWidth) - e.pageX
+            let _right = (self.preview_offset.left + preview_inner.clientWidth) - e.pageX
             if (_right < preview_inner.clientWidth - self.crop_area.left && _right > 0) {
                 self.crop_area.width = Math.round(preview_inner.clientWidth - self.crop_area.left - _right)
             }
@@ -108,26 +111,25 @@ function Crop(options) {
         _update_overlay()
     }
 
-    var last_position
     function drag_crop_area(e) {
-        if (last_position) {
+        if (self.last_position) {
             /* Get new crop position */
-            let deltaX = e.clientX - last_position.x,
-                deltaY = e.clientY - last_position.y,
+            let deltaX = e.clientX - self.last_position.x,
+                deltaY = e.clientY - self.last_position.y,
                 new_pos = {
                     left: self.crop_area.left + deltaX < 0 ? 0 : self.crop_area.left + deltaX,
                     top: self.crop_area.top + deltaY < 0 ? 0 : self.crop_area.top + deltaY
                 }
 
             /* Restrict to inside crop area */
-            if (new_pos.left >= preview_inner.clientWidth - self.crop_area.width) new_pos.left = self.crop_area.left
-            if (new_pos.top >= preview_inner.clientHeight - self.crop_area.height) new_pos.top = self.crop_area.top
+            if (new_pos.left > preview_inner.clientWidth - self.crop_area.width) new_pos.left = self.crop_area.left
+            if (new_pos.top > preview_inner.clientHeight - self.crop_area.height) new_pos.top = self.crop_area.top
 
             /* Update overlay then render */
             self.crop_area = Object.assign(self.crop_area, new_pos)
             _update_overlay()
         }
-        last_position = {
+        self.last_position = {
             x: e.clientX,
             y: e.clientY
         }
@@ -135,6 +137,17 @@ function Crop(options) {
 
     /* Update overlay dimensions */
     function _update_overlay() {
+        /* Constrain to image preview */
+        self.crop_area.left = Math.max(self.crop_area.left, 0)
+        self.crop_area.top = Math.max(self.crop_area.top, 0)
+        self.crop_area.width = self.crop_area.left + self.crop_area.width < preview_inner.clientWidth
+            ? self.crop_area.width
+            : preview_inner.clientWidth - self.crop_area.left
+        self.crop_area.height = self.crop_area.top + self.crop_area.height < preview_inner.clientHeight
+            ? self.crop_area.height
+            : preview_inner.clientHeight - self.crop_area.top
+
+        /* Apply styles to crop overlay */
         crop_overlay.style.left = self.crop_area.left + 'px'
         crop_overlay.style.top = self.crop_area.top + 'px'
         crop_overlay.style.width = self.crop_area.width + 'px'
@@ -143,13 +156,20 @@ function Crop(options) {
 
     /* Fetch cropped image preview from server */
     function _update_preview() {
-        let options = {
-            method: 'POST',
-            body: JSON.stringify(self.crop_area),
-            headers: new Headers({
-                'Content-Type': 'application/json'
-            })
+        let scale = img_el.naturalWidth / img_el.clientWidth,
+            _real_crop_area = {}
+
+        for (let dim in self.crop_area) {
+            _real_crop_area[dim] = Math.round(self.crop_area[dim] * scale)
         }
+
+        let options = {
+                method: 'POST',
+                body: JSON.stringify(_real_crop_area),
+                headers: new Headers({
+                    'Content-Type': 'application/json'
+                })
+            }
         fetch('/preview', options)
             .then(response => {
                 return response.text()
@@ -161,6 +181,21 @@ function Crop(options) {
                 }
                 self.preview_img.src = 'data:image/jpeg;base64,' + base64_preview
             })
+    }
+
+    /* Convert value to px inside container */
+    function convert_to_px(value, total) {
+        /* Validate value, convert value to string */
+        if (typeof value == 'undefined') return 0
+        value += ''
+        let number = parseFloat(value.replace(/[^-\d]+/, '')),
+            unit = value.replace(/[-\d]+/, '')
+        if (unit == '%')
+            return total * number / 100
+        else if (unit == 'px')
+            return number < total ? number : total;
+        else
+            return number
     }
 
     /* Limit calls to a function */
@@ -247,7 +282,7 @@ function Crop(options) {
             document.addEventListener('mousemove', drag_crop_area, false)
         }, false)
         document.addEventListener('mouseup', () => {
-            last_position = null
+            self.last_position = null
             document.removeEventListener('mousemove', click_move, false)
             document.removeEventListener('mousemove', drag_crop_area, false)
             _update_preview()
@@ -255,7 +290,7 @@ function Crop(options) {
         window.addEventListener('resize', throttle(() => {
             _update_offset()
             _update_overlay()
-            last_position = null
+            self.last_position = null
         }, 50), false)
     }
 
