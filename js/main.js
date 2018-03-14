@@ -8,10 +8,10 @@ document.addEventListener('DOMContentLoaded', function () {
         element: '#crop1',
         preview: '#preview1',
         area: {
-            left: '80%',
-            top: '20px',
-            width: '20%',
-            height: '40px'
+            left: '15%',
+            top: '15%',
+            width: '70%',
+            height: '70%'
         }
     }), new Crop({
         element: '#crop2',
