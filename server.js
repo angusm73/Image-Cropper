@@ -1,6 +1,7 @@
 const server = require('express')
 const livereload = require('connect-livereload')
 const bodyparser = require('body-parser')
+const fs = require('fs')
 const app = module.exports.app = exports.app = server()
 const http_port = 1337
 
@@ -21,15 +22,32 @@ app.use(bodyparser.json())
 /* Front end public files */
 app.use(server.static('../dist'))
 
-/* Default route */
+/* Default route - index */
 app.get('/', function (request, response) {
     response.sendFile(__dirname + '/index.htm')
 })
 
+/* Upload image */
+app.post('/upload', function (request, response) {
+    let img_name = request.body.file_name,
+        upload_path = __dirname + '/uploads/' + img_name,
+        img_data = request.body.data.replace(/^data:image\/\w+;base64,/, ''),
+        base64_img = new Buffer(img_data, 'base64')
+
+    fs.writeFile(upload_path, base64_img, (err) => {
+        if (err) {
+            console.log('[Error] Image failed to upload - ', err)
+            response.end('error')
+        }
+        console.log('[Success] Image uploaded - ' + img_name)
+        response.end(img_name)
+    })
+})
+
 /* Load preview */
-const load_preview = require(__dirname + '/crop-image.js')
+const Cropper = require(__dirname + '/crop-image.js')
 app.post('/preview', function (request, response) {
-    let img_data = load_preview.generate(request.body)
+    Cropper.generate(request.body)
         .then(data => {
             response.end(data.toString('base64'), 'utf8', () => {
                 console.log('done')
@@ -38,9 +56,7 @@ app.post('/preview', function (request, response) {
         .catch(err => {
             response.status(500)
             console.log('ending with error', err)
-            response.end('There was a problem processing your request.', 'utf8', () => {
-                console.log('error done')
-            })
+            response.end('There was a problem processing your request.', 'utf8')
         })
 })
 

@@ -36,10 +36,28 @@ function Crop(options) {
                 img_el.src = e.target.result
                 preview.classList.remove('no-img')
                 preview.children[0].classList.add('hidden')
+                _upload_image(input.files[0].name, img_el.src)
             }
             reader.readAsDataURL(input.files[0])
         }
         _update_offset()
+    }
+
+    /* Upload image */
+    function _upload_image(img_name, img_data) {
+        let options = {
+            method: 'POST',
+            body: JSON.stringify({
+                data: img_data,
+                file_name: img_name
+            }),
+            headers: new Headers({
+                'Content-Type': 'application/json'
+            })
+        }
+        fetch('/upload', options)
+            .then(response => response.text())
+            .then(body => console.log(body))
     }
 
     /* Remove image preview */
@@ -212,16 +230,14 @@ function Crop(options) {
         }
 
         let options = {
-                method: 'POST',
-                body: JSON.stringify(_real_crop_area),
-                headers: new Headers({
-                    'Content-Type': 'application/json'
-                })
-            }
-        fetch('/preview', options)
-            .then(response => {
-                return response.text()
+            method: 'POST',
+            body: JSON.stringify(_real_crop_area),
+            headers: new Headers({
+                'Content-Type': 'application/json'
             })
+        }
+        fetch('/preview', options)
+            .then(response => response.text())
             .then(base64_preview => {
                 if (!self.preview_img) {
                     self.preview_img = document.createElement('img')
@@ -359,5 +375,4 @@ function Crop(options) {
     this.choose_image = choose_image
 
     return this
-
 }

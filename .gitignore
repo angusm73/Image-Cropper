@@ -1,19 +1,12 @@
 .DS_Store
-*.esproj
 *.codekit*
-.vscode/*
-.remote-sync.json
-sftp-config.json
-sftp-config-alt.json
+.vscode/
 
 error_log
 yarn-error.log
 /node_modules/
 
-/images/*
-/files/*
-/admin/orders/logs/*
+/uploads/
 
 *.scssc
 *.css.map
-*.scssc
