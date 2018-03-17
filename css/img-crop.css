@@ -1,11 +1,11 @@
 /* Button */
-.btn.upload-btn                 { margin-bottom: 10px; }
-.btn.remove-btn                 { position: absolute; top: 20px; right: 20px; z-index: 2; }
+.btn                            { background: none; border: none; margin-bottom: 10px; }
 
 /* Crop Wrapper */
-.crop-preview                   { position: relative; display: block; padding: 15px; background: #EFEFEF; user-select: none; }
-.crop-preview img               { display: block; width: 100%; }
+.crop-preview                   { position: relative; display: block; max-width: 100%; border: 2px solid #000; background-image: linear-gradient(45deg, #808080 25%, transparent 25%), linear-gradient(-45deg, #808080 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #808080 75%), linear-gradient(-45deg, transparent 75%, #808080 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; user-select: none; transition: background .25s ease-in-out; }
+.crop-preview img               { display: block; }
 .crop-preview:not(.no-img) p    { margin-bottom: 10px; }
+.crop-preview.no-img            { padding: 10px; background: #FFF; }
 .crop-preview.no-img .remove-btn,
 .crop-preview.no-img img        { display: none; }
 

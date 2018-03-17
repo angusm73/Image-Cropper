@@ -1,6 +1,8 @@
 /* HTML RESET */
 html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,abbr,address,cite,code,del,dfn,em,img,ins,kbd,q,samp,small,strong,sub,sup,var,b,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,figcaption,figure,footer,header,hgroup,menu,nav,section,summary,time,mark,audio,video{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}nav ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}a{margin:0;padding:0;font-size:100%;vertical-align:baseline;background:transparent}ins{background-color:#FF9;color:#000;text-decoration:none}mark{background-color:#FF9;color:#000;font-style:italic;font-weight:700}del{text-decoration:line-through}abbr[title],dfn[title]{border-bottom:1px dotted;cursor:help}table{border-collapse:collapse;border-spacing:0}hr{display:block;height:1px;border:0;border-top:1px solid #CCC;margin:1em 0;padding:0}input,select{vertical-align:middle}
 
+
+
 /* STYLE */
 html, body                      { min-height: 100vh; color: #363636; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.4; }
 h1                              { font-size: 3em; }
@@ -17,10 +19,14 @@ a:hover                         { color: #1DC8EE; }
 .wrapper                        { display: grid; min-height: 100vh; grid-template-areas: 'lh head rh' 'lb cont rb'; grid-template-columns: 5% auto 5%; grid-template-rows: auto 1fr; }
 .header                         { grid-area: head; align-self: flex-end; padding: 30px 0; border-bottom: 1px solid #C0C0C0; }
 .main-content                   { grid-area: cont; padding-top: 30px; }
-.cropper                        { float: left; width: 50%; }
+.croppers                       { display: grid; grid-template-columns: 50% 50%; grid-gap: 20px; max-width: 100%; }
+.croppers > *:nth-of-type(1n)   { justify-self: start; }
+.croppers > *:nth-of-type(2n)   { grid-row-start: 2; max-width: 50%; }
+.croppers .crop-preview img     { max-height: 250px; }
 
 
 
+/* MOBILE OPT */
 @media screen and (max-width: 640px) {
     .wrapper                    { padding: 0 3%; grid-template-columns: 1fr; grid-template-areas: 'head' 'cont'; }
 }

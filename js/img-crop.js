@@ -12,6 +12,8 @@ function Crop(options) {
         this.preview = document.querySelector(options.preview)
     }
 
+    this.img_url = (typeof options == 'object' && options.img) ? options.img : 'test.png'
+
 
 
     /* ---------------- */
@@ -57,7 +59,12 @@ function Crop(options) {
         }
         fetch('/upload', options)
             .then(response => response.text())
-            .then(body => console.log(body))
+            .then(uploaded_filename => {
+                if (uploaded_filename !== 'error') {
+                    self.img_url = uploaded_filename
+                    img_el.src = '/uploads/' + self.img_url
+                }
+            })
     }
 
     /* Remove image preview */
@@ -65,12 +72,16 @@ function Crop(options) {
         img_el.style.display = 'none'
         preview.classList.add('no-img')
         preview.children[0].classList.remove('hidden')
+        /* Replace input element */
         input.remove()
         input = document.createElement('input')
         input.type = 'file'
         input.classList.add('hidden')
         input.addEventListener('change', show_preview, false)
-        self.element.querySelector('form').appendChild(input)
+        this.element.querySelector('form').appendChild(input)
+        this.img_url = ''
+        this.preview_img.src = ''
+        this._update_preview()
     }
 
     var cur_side
@@ -206,10 +217,10 @@ function Crop(options) {
         /* Constrain to image preview */
         self.crop_area.left = Math.max(self.crop_area.left, 0)
         self.crop_area.top = Math.max(self.crop_area.top, 0)
-        self.crop_area.width = self.crop_area.left + self.crop_area.width < preview_inner.clientWidth
+        self.crop_area.width = self.crop_area.left + self.crop_area.width <= preview_inner.clientWidth
             ? self.crop_area.width
             : preview_inner.clientWidth - self.crop_area.left
-        self.crop_area.height = self.crop_area.top + self.crop_area.height < preview_inner.clientHeight
+        self.crop_area.height = self.crop_area.top + self.crop_area.height <= preview_inner.clientHeight
             ? self.crop_area.height
             : preview_inner.clientHeight - self.crop_area.top
 
@@ -224,14 +235,17 @@ function Crop(options) {
     function _update_preview() {
         /* Scale crop dimensions to real image size */
         let scale = img_el.naturalWidth / img_el.clientWidth,
-            _real_crop_area = {}
-        for (let dim in self.crop_area) {
-            _real_crop_area[dim] = Math.round(self.crop_area[dim] * scale)
+            img_options = {
+                img: this.img_url
+            }
+
+        for (let dim in this.crop_area) {
+            img_options[dim] = Math.round(this.crop_area[dim] * scale)
         }
 
         let options = {
             method: 'POST',
-            body: JSON.stringify(_real_crop_area),
+            body: JSON.stringify(img_options),
             headers: new Headers({
                 'Content-Type': 'application/json'
             })
@@ -239,11 +253,11 @@ function Crop(options) {
         fetch('/preview', options)
             .then(response => response.text())
             .then(base64_preview => {
-                if (!self.preview_img) {
-                    self.preview_img = document.createElement('img')
-                    self.preview.appendChild(self.preview_img)
+                if (!this.preview_img) {
+                    this.preview_img = document.createElement('img')
+                    this.preview.appendChild(this.preview_img)
                 }
-                self.preview_img.src = 'data:image/jpeg;base64,' + base64_preview
+                this.preview_img.src = 'data:image/jpeg;base64,' + base64_preview
             })
     }
 
@@ -261,7 +275,7 @@ function Crop(options) {
         if (unit == '%')
             return total * number / 100
         else if (unit == 'px')
-            return number < total ? number : total;
+            return number < total ? number : total
         else
             return number
     }
@@ -286,13 +300,19 @@ function Crop(options) {
         upload_btn = document.createElement('button')
         upload_btn.classList.add('btn')
         upload_btn.classList.add('upload-btn')
-        upload_btn.innerHTML = "Upload Image"
+        let _upload_img = document.createElement('img')
+        _upload_img.alt = "Upload Image"
+        _upload_img.src = "/imgs/upload.svg"
+        upload_btn.appendChild(_upload_img)
 
         /* Remove button */
         remove_btn = document.createElement('button')
         remove_btn.classList.add('btn')
         remove_btn.classList.add('remove-btn')
-        remove_btn.innerHTML = "Remove"
+        let _remove_img = document.createElement('img')
+        _remove_img.alt = "Remove"
+        _remove_img.src = "/imgs/remove.svg"
+        remove_btn.appendChild(_remove_img)
 
         /* Form */
         input = document.createElement('input')
@@ -311,12 +331,11 @@ function Crop(options) {
         _placeholder.classList.add('hidden')
         _placeholder.textContent = "Please choose an image to start cropping..."
         preview.appendChild(_placeholder)
-        preview.appendChild(remove_btn)
         preview.appendChild(preview_inner)
 
         /* Image */
         img_el = document.createElement('img')
-        img_el.src = "/test.png"
+        img_el.src = "/uploads/" + this.img_url
         img_el.alt = "crop preview"
         preview_inner.appendChild(img_el)
 
@@ -331,35 +350,36 @@ function Crop(options) {
         }
         preview_inner.appendChild(crop_overlay)
 
-        /* Append everything to self.element */
-        self.element.appendChild(upload_btn)
-        self.element.appendChild(preview)
-        self.element.appendChild(form)
+        /* Append everything to this.element */
+        this.element.appendChild(upload_btn)
+        this.element.appendChild(remove_btn)
+        this.element.appendChild(preview)
+        this.element.appendChild(form)
     }
 
     /* Bind events */
     function bind_events() {
         img_el.addEventListener('load', _update_offset)
         img_el.addEventListener('load', _update_overlay)
-        img_el.addEventListener('load', _update_preview)
+        img_el.addEventListener('load', _update_preview.bind(this))
         upload_btn.addEventListener('click', choose_image, false)
-        remove_btn.addEventListener('click', remove_preview, false)
+        remove_btn.addEventListener('click', remove_preview.bind(this), false)
         input.addEventListener('change', show_preview, false)
         crop_overlay.addEventListener('mousedown', (e) => {
             if (!e.target.classList.contains('crop-overlay')) return
             document.addEventListener('mousemove', _area_drag, false)
         }, false)
         document.addEventListener('mouseup', () => {
-            self.last_position = null
+            this.last_position = null
             document.removeEventListener('mousemove', _side_move, false)
             document.removeEventListener('mousemove', _corner_move, false)
             document.removeEventListener('mousemove', _area_drag, false)
-            _update_preview()
+            this._update_preview()
         }, false)
         window.addEventListener('resize', _throttle(() => {
             _update_offset()
             _update_overlay()
-            self.last_position = null
+            this.last_position = null
         }, 50), false)
     }
 
@@ -367,12 +387,13 @@ function Crop(options) {
 
     /* Initialise Crop */
     (() => {
-        generate_crop_template()
-        bind_events()
+        generate_crop_template.call(this)
+        bind_events.call(this)
     })()
 
     /* Public functions */
     this.choose_image = choose_image
+    this._update_preview = _update_preview
 
     return this
 }

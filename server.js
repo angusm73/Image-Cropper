@@ -20,7 +20,8 @@ app.use(bodyparser.urlencoded({
 app.use(bodyparser.json())
 
 /* Front end public files */
-app.use(server.static('../dist'))
+app.use('/', server.static('../dist'))
+app.use('/uploads', server.static('./uploads'))
 
 /* Default route - index */
 app.get('/', function (request, response) {

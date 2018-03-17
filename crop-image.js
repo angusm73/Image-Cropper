@@ -2,7 +2,10 @@ let sharp = require('sharp')
 
 /* Apply crop to image */
 function generate_image(options) {
-    let image = sharp(__dirname + '/test.png')
+    if (options.left === null) {
+        return Promise.resolve('')
+    }
+    let image = sharp(__dirname + '/uploads/' + options.img)
         .extract({ left: options.left, top: options.top, width: options.width, height: options.height })
         .rotate()
         .jpeg()

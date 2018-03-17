@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
         new Crop({
             element: '#crop1',
             preview: '#preview1',
+            img: 'meme.jpg',
             area: {
                 left: '15%',
                 top: '15%',

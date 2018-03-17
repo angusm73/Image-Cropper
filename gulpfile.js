@@ -10,11 +10,9 @@ gulp.task('html', () => {
     gulp.src('**.htm')
         .pipe(gulp.dest('../dist'))
         .pipe(server.notify())
-    gulp.src('**.png')
-        .pipe(gulp.dest('../dist'))
-        .pipe(server.notify())
-    gulp.src('**.jpg')
-        .pipe(gulp.dest('../dist'))
+    // copy images -> dist/
+    gulp.src('imgs/**.svg')
+        .pipe(gulp.dest('../dist/imgs'))
         .pipe(server.notify())
 })
 
