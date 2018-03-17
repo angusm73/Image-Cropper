@@ -3,7 +3,7 @@ Pure JS image cropping system
 
 Basic image cropping system using a client side preview. Image manipulation will be handled with [sharp](http://sharp.pixelplumbing.com).
 ### [Demo](https://angusm73.github.io/Image-Cropper/)
-![Early example](https://i.imgur.com/lYuqUaQ.png)
+![Early example](https://i.imgur.com/L6cZLHx.png)
 
 This project uses a build folder called ../dist/
 
