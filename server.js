@@ -37,7 +37,7 @@ app.post('/upload', function (request, response) {
 
     fs.writeFile(upload_path, base64_img, (err) => {
         if (err) {
-            console.log('[Error] Image failed to upload - ', err)
+            console.error('[Error] Image failed to upload - ', err)
             response.end('error')
         }
         console.log('[Success] Image uploaded - ' + img_name)
@@ -50,13 +50,11 @@ const Cropper = require(__dirname + '/crop-image.js')
 app.post('/preview', function (request, response) {
     Cropper.generate(request.body)
         .then(data => {
-            response.end(data.toString('base64'), 'utf8', () => {
-                console.log('done')
-            })
+            response.end(data.toString('base64'), 'utf8')
         })
         .catch(err => {
             response.status(500)
-            console.log('ending with error', err)
+            console.error('ending with error', err)
             response.end('There was a problem processing your request.', 'utf8')
         })
 })
