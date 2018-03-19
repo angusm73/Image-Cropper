@@ -6,7 +6,5 @@ error_log
 yarn-error.log
 /node_modules/
 
-/uploads/
-
 *.scssc
 *.css.map
