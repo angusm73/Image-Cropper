@@ -15,8 +15,8 @@ function generate_image(options) {
             }
 
             /* Constrain crop area to image dimensions */
-            options.height = options.top + options.height <= size.height ? options.height : size.height - options.top
-            options.width = options.left + options.width <= size.width ? options.width : size.width - options.left
+            options.height = Math.abs(options.top + options.height <= size.height ? options.height : size.height - options.top)
+            options.width = Math.abs(options.left + options.width <= size.width ? options.width : size.width - options.left)
 
             resolve(
                 sharp(__dirname + '/uploads/' + options.img)

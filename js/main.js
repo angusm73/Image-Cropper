@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }),
         new Crop({
             element: '#crop2',
-            preview: '#preview2'
+            preview: '#preview2',
+            ratio: 2 / 1
         })
     ]
     console.log(croppers)
