@@ -21,4 +21,4 @@ document.addEventListener('DOMContentLoaded', function () {
   })];
   console.log(croppers);
 }, false);
-//# sourceMappingURL=main.js.map
+//# sourceMappingURL=demo.js.map
