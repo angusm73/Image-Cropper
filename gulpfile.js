@@ -42,8 +42,8 @@ gulp.task('build', () => {
 gulp.task('watch', () => {
     server.run(['demo/server.js'])
     gulp.watch('**.htm', ['html'])
-    gulp.watch('css/*.css', ['css'])
-    gulp.watch('js/*.js', ['js'])
+    gulp.watch(['css/**.css', 'demo/**.css'], ['css'])
+    gulp.watch(['src/**.js', 'demo/**.js'], ['js'])
 })
 
 
