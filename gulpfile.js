@@ -7,31 +7,31 @@ const sourcemaps = require('gulp-sourcemaps')
 
 gulp.task('html', () => {
     // copy html -> dist/
-    gulp.src('**.htm')
-        .pipe(gulp.dest('../dist'))
+    gulp.src('demo/**.htm')
+        .pipe(gulp.dest('dist'))
         .pipe(server.notify())
     // copy images -> dist/
     gulp.src('imgs/**.svg')
-        .pipe(gulp.dest('../dist/imgs'))
+        .pipe(gulp.dest('dist/imgs'))
         .pipe(server.notify())
 })
 
 gulp.task('css', () => {
     // copy css -> dist/
-    gulp.src('css/**.css')
-        .pipe(gulp.dest('../dist/css'))
+    gulp.src(['resources/img-crop.css', 'demo/demo.css'])
+        .pipe(gulp.dest('dist/css'))
         .pipe(server.notify())
 })
 
 gulp.task('js', () => {
     // transpile es6 down to normal js + move -> dist/
-    gulp.src('js/**.js')
+    gulp.src(['resources/img-crop.js', 'demo/demo.js'])
         .pipe(sourcemaps.init())
         .pipe(babel({
             presets: ['env']
         }))
         .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('../dist/js'))
+        .pipe(gulp.dest('dist/js'))
         .pipe(server.notify())
 })
 
@@ -40,7 +40,7 @@ gulp.task('build', () => {
 })
 
 gulp.task('watch', () => {
-    server.run(['server.js'])
+    server.run(['demo/server.js'])
     gulp.watch('**.htm', ['html'])
     gulp.watch('css/*.css', ['css'])
     gulp.watch('js/*.js', ['js'])

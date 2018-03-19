@@ -21,11 +21,11 @@ app.use(bodyparser.json())
 
 /* Front end public files */
 app.use('/', server.static('../dist'))
-app.use('/uploads', server.static('./uploads'))
+app.use('/uploads', server.static('./demo/uploads'))
 
 /* Default route - index */
 app.get('/', function (request, response) {
-    response.sendFile(__dirname + '/index.htm')
+    response.redirect('/index.htm')
 })
 
 /* Upload image */
