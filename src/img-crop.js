@@ -74,128 +74,74 @@ function Crop(options) {
         self._update_preview()
     }
 
-    var cur_side
+    var moving_sides = []
     function _side_click_start(e) {
-        cur_side = {
-            el: e.target,
-            index: Array.prototype.indexOf.call(e.target.parentElement.children, e.target) + 1
-        }
-        document.addEventListener('mousemove', _side_move, false)
+        let index = Array.prototype.indexOf.call(e.target.parentElement.children, e.target) + 1
+        moving_sides = [index]
+        document.addEventListener('mousemove', _anchor_drag, false)
         e.preventDefault()
         return false
     }
 
-    var cur_corner
     function _corner_click_start(e) {
-        cur_corner = {
-            el: e.target,
-            index: Array.prototype.indexOf.call(e.target.parentElement.children, e.target) - 3
-        }
-        document.addEventListener('mousemove', _corner_move, false)
+        let index = Array.prototype.indexOf.call(e.target.parentElement.children, e.target) - 3
+        moving_sides = [index, index - 1 ? index - 1 : 4]
+        document.addEventListener('mousemove', _anchor_drag, false)
         e.preventDefault()
         return false
     }
 
-    function _side_move(e) {
-        if (cur_side.index == 1) {
-            // Top
-            let _top = e.pageY - self.preview_offset.top
-            if (_top < preview_inner.clientHeight && _top > 0) {
-                let _old_top = self.crop_area.top
-                self.crop_area.top = Math.round(_top)
-                self.crop_area.height -= self.crop_area.top - _old_top
-                if (options.ratio) {
-                    let _old_width = self.crop_area.width
-                    self.crop_area.width = self.crop_area.height * options.ratio
-                    self.crop_area.left -= self.crop_area.width - _old_width
-                }
-            }
-        } else if (cur_side.index == 3) {
-            // Bottom
-            let _bottom = (self.preview_offset.top + preview_inner.clientHeight) - e.pageY
-            if (_bottom < preview_inner.clientHeight - self.crop_area.top && _bottom > 0) {
-                self.crop_area.height = Math.round(preview_inner.clientHeight - self.crop_area.top - _bottom)
-                if (options.ratio) {
-                    self.crop_area.width = self.crop_area.height * options.ratio
-                }
-            }
-        } else if (cur_side.index == 4) {
-            // Left
+    function _anchor_drag(e) {
+        let old_area = self.crop_area
+        // Left
+        if (moving_sides.includes(4)) {
             let _left = e.pageX - self.preview_offset.left
             if (_left < preview_inner.clientWidth && _left > 0) {
-                let _old_left = self.crop_area.left
                 self.crop_area.left = Math.round(_left)
-                self.crop_area.width -= self.crop_area.left - _old_left
+                self.crop_area.width -= self.crop_area.left - old_area.left
                 if (options.ratio) {
-                    let _old_height = self.crop_area.height
                     self.crop_area.height = self.crop_area.width / options.ratio
-                    self.crop_area.top -= self.crop_area.height - _old_height
+                    if (moving_sides.includes(1)) {
+                        self.crop_area.top -= self.crop_area.height - old_area.height
+                    }
+                    _update_overlay()
+                    return
                 }
             }
-        } else {
-            // Right
+        }
+        // Top
+        if (moving_sides.includes(1)) {
+            let _top = e.pageY - self.preview_offset.top
+            if (_top < preview_inner.clientHeight && _top > 0) {
+                self.crop_area.top = Math.round(_top)
+                self.crop_area.height -= self.crop_area.top - old_area._top
+                if (options.ratio) {
+                    self.crop_area.width = self.crop_area.height * options.ratio
+                    if (moving_sides.includes(4)) {
+                        self.crop_area.left -= self.crop_area.width - old_area._width
+                    }
+                    _update_overlay()
+                    return
+                }
+            }
+        }
+        // Right
+        if (moving_sides.includes(2)) {
             let _right = (self.preview_offset.left + preview_inner.clientWidth) - e.pageX
             if (_right < preview_inner.clientWidth - self.crop_area.left && _right > 0) {
                 self.crop_area.width = Math.round(preview_inner.clientWidth - self.crop_area.left - _right)
                 if (options.ratio) {
                     self.crop_area.height = self.crop_area.width / options.ratio
-                }
-            }
-        }
-        _update_overlay()
-    }
-
-    function _corner_move(e) {
-        // Top
-        if (cur_corner.index == 1 || cur_corner.index == 2) {
-            let _top = e.pageY - self.preview_offset.top
-            if (_top < preview_inner.clientHeight && _top > 0) {
-                let _old_top = self.crop_area.top
-                self.crop_area.top = Math.round(_top)
-                self.crop_area.height -= self.crop_area.top - _old_top
-                if (options.ratio) {
-                    let _old_width = self.crop_area.width;
-                    self.crop_area.width = self.crop_area.height * options.ratio
-                    if (cur_corner.index == 1) {
-                        self.crop_area.left -= self.crop_area.width - _old_width
-                    }
-                    _update_overlay()
-                    return
-                }
-            }
-        }
-        // Left
-        if (cur_corner.index == 1 || cur_corner.index == 4) {
-            let _left = e.pageX - self.preview_offset.left
-            if (_left < preview_inner.clientWidth && _left > 0) {
-                let _old_left = self.crop_area.left
-                self.crop_area.left = Math.round(_left)
-                self.crop_area.width -= self.crop_area.left - _old_left
-                if (options.ratio) {
-                    let _old_height = self.crop_area.height
-                    self.crop_area.height = self.crop_area.width / options.ratio
-                    if (cur_corner.index == 1) {
-                        self.crop_area.top -= self.crop_area.height - _old_height
-                    }
-                    _update_overlay()
-                    return
                 }
             }
         }
         // Bottom
-        if (cur_corner.index == 3 || cur_corner.index == 4) {
+        if (moving_sides.includes(3)) {
             let _bottom = (self.preview_offset.top + preview_inner.clientHeight) - e.pageY
             if (_bottom < preview_inner.clientHeight - self.crop_area.top && _bottom > 0) {
                 self.crop_area.height = Math.round(preview_inner.clientHeight - self.crop_area.top - _bottom)
-            }
-        }
-        // Right
-        if (cur_corner.index == 2 || cur_corner.index == 3) {
-            let _right = (self.preview_offset.left + preview_inner.clientWidth) - e.pageX
-            if (_right < preview_inner.clientWidth - self.crop_area.left && _right > 0) {
-                self.crop_area.width = Math.round(preview_inner.clientWidth - self.crop_area.left - _right)
                 if (options.ratio) {
-                    self.crop_area.height = self.crop_area.width / options.ratio
+                    self.crop_area.width = self.crop_area.height * options.ratio
                 }
             }
         }
@@ -401,8 +347,7 @@ function Crop(options) {
         }, false)
         document.addEventListener('mouseup', () => {
             self.last_position = null
-            document.removeEventListener('mousemove', _side_move, false)
-            document.removeEventListener('mousemove', _corner_move, false)
+            document.removeEventListener('mousemove', _anchor_drag, false)
             document.removeEventListener('mousemove', _area_drag, false)
             _update_preview()
         }, false)
