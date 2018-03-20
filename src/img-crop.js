@@ -92,16 +92,16 @@ function Crop(options) {
     }
 
     function _anchor_drag(e) {
-        let old_area = self.crop_area
+        let old_area = JSON.parse(JSON.stringify(self.crop_area))
         // Left
         if (moving_sides.includes(4)) {
-            let _left = e.pageX - self.preview_offset.left
-            if (_left < preview_inner.clientWidth && _left > 0) {
-                self.crop_area.left = Math.round(_left)
+            let _left = Math.max(e.pageX - self.preview_offset.left, 0)
+            self.crop_area.left = Math.round(_left)
+            if (self.crop_area.left - (self.crop_area.width - old_area.width) > 0) {
                 self.crop_area.width -= self.crop_area.left - old_area.left
                 if (options.ratio) {
                     self.crop_area.height = self.crop_area.width / options.ratio
-                    if (moving_sides.includes(1)) {
+                    if (moving_sides.includes(1) && self.crop_area.top - (self.crop_area.height - old_area.height) > 0) {
                         self.crop_area.top -= self.crop_area.height - old_area.height
                     }
                     _update_overlay()
@@ -111,14 +111,14 @@ function Crop(options) {
         }
         // Top
         if (moving_sides.includes(1)) {
-            let _top = e.pageY - self.preview_offset.top
-            if (_top < preview_inner.clientHeight && _top > 0) {
-                self.crop_area.top = Math.round(_top)
-                self.crop_area.height -= self.crop_area.top - old_area._top
+            let _top = Math.max(e.pageY - self.preview_offset.top, 0)
+            self.crop_area.top = Math.round(_top)
+            if (self.crop_area.top - (self.crop_area.height - old_area.height) > 0) {
+                self.crop_area.height -= self.crop_area.top - old_area.top
                 if (options.ratio) {
                     self.crop_area.width = self.crop_area.height * options.ratio
-                    if (moving_sides.includes(4)) {
-                        self.crop_area.left -= self.crop_area.width - old_area._width
+                    if (moving_sides.includes(4) && self.crop_area.left - (self.crop_area.width - old_area.width) > 0) {
+                        self.crop_area.left -= self.crop_area.width - old_area.width
                     }
                     _update_overlay()
                     return
@@ -127,22 +127,18 @@ function Crop(options) {
         }
         // Right
         if (moving_sides.includes(2)) {
-            let _right = (self.preview_offset.left + preview_inner.clientWidth) - e.pageX
-            if (_right < preview_inner.clientWidth - self.crop_area.left && _right > 0) {
-                self.crop_area.width = Math.round(preview_inner.clientWidth - self.crop_area.left - _right)
-                if (options.ratio) {
-                    self.crop_area.height = self.crop_area.width / options.ratio
-                }
+            let _right = Math.max((self.preview_offset.left + preview_inner.clientWidth) - e.pageX, 0)
+            self.crop_area.width = Math.round(preview_inner.clientWidth - self.crop_area.left - _right)
+            if (options.ratio) {
+                self.crop_area.height = self.crop_area.width / options.ratio
             }
         }
         // Bottom
         if (moving_sides.includes(3)) {
-            let _bottom = (self.preview_offset.top + preview_inner.clientHeight) - e.pageY
-            if (_bottom < preview_inner.clientHeight - self.crop_area.top && _bottom > 0) {
-                self.crop_area.height = Math.round(preview_inner.clientHeight - self.crop_area.top - _bottom)
-                if (options.ratio) {
-                    self.crop_area.width = self.crop_area.height * options.ratio
-                }
+            let _bottom = Math.max((self.preview_offset.top + preview_inner.clientHeight) - e.pageY, 0)
+            self.crop_area.height = Math.round(preview_inner.clientHeight - self.crop_area.top - _bottom)
+            if (options.ratio) {
+                self.crop_area.width = self.crop_area.height * options.ratio
             }
         }
         _update_overlay()
@@ -190,16 +186,6 @@ function Crop(options) {
 
     /* Update overlay dimensions */
     function _update_overlay() {
-        /* Constrain to image preview */
-        self.crop_area.left = Math.max(self.crop_area.left, 0)
-        self.crop_area.top = Math.max(self.crop_area.top, 0)
-        self.crop_area.width = self.crop_area.left + self.crop_area.width <= preview_inner.clientWidth
-            ? self.crop_area.width
-            : preview_inner.clientWidth - self.crop_area.left
-        self.crop_area.height = self.crop_area.top + self.crop_area.height <= preview_inner.clientHeight
-            ? self.crop_area.height
-            : preview_inner.clientHeight - self.crop_area.top
-
         /* Apply styles to crop overlay */
         crop_overlay.style.left = self.crop_area.left + 'px'
         crop_overlay.style.top = self.crop_area.top + 'px'
