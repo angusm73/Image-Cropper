@@ -230,10 +230,10 @@ function Crop(options) {
         /* Set initial crop area */
         if (typeof self.crop_area == 'undefined') {
             self.crop_area = {
-                left: _convert_to_px(options.area ? options.area.left : '10px', img_el.clientWidth),
-                top: _convert_to_px(options.area ? options.area.top : '10px', img_el.clientHeight),
-                width: _convert_to_px(options.area ? options.area.width : '50px', img_el.clientWidth),
-                height: _convert_to_px(options.area ? options.area.height : '50px', img_el.clientHeight)
+                left: _convert_to_px(options.area ? options.area.left : '10%', img_el.clientWidth),
+                top: _convert_to_px(options.area ? options.area.top : '10%', img_el.clientHeight),
+                width: _convert_to_px(options.area ? options.area.width : '40%', img_el.clientWidth),
+                height: _convert_to_px(options.area ? options.area.height : '40%', img_el.clientHeight)
             }
             if (options.ratio) {
                 self.crop_area.height = self.crop_area.width / options.ratio
@@ -430,7 +430,7 @@ function Crop(options) {
         } else {
             self.element = document.querySelector(options)
         }
-        self.img_url = self.img_url ? self.img_url : 'test.png'
+        self.img_url = self.img_url ? self.img_url : 'test-image-1.png'
 
         generate_crop_template()
         bind_events()

@@ -6,18 +6,19 @@ document.addEventListener('DOMContentLoaded', () => {
         new Crop({
             element: '#crop1',
             preview: '#preview1',
-            img: 'meme.jpg',
+            img: 'test-image-1.png',
             area: {
-                left: '15%',
-                top: '15%',
-                width: '70%',
-                height: '70%'
+                left: '10%',
+                top: '10%',
+                width: '80%',
+                height: '30%'
             }
         }),
         new Crop({
             element: '#crop2',
             preview: '#preview2',
-            ratio: 2 / 1
+            img: 'test-image-2.png',
+            ratio: 1
         })
     ]
     console.log(croppers)
