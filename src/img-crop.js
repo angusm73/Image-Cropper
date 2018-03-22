@@ -361,6 +361,10 @@ function Crop(options) {
         } else {
             self.element = document.querySelector(options)
         }
+        self.element.classList.add('img-cropper')
+        if (self.preview) {
+            self.preview.classList.add('preview-wrapper');
+        }
         self.img_url = self.img_url ? self.img_url : 'test-image-1.png'
 
         generate_crop_template()

@@ -1,5 +1,5 @@
-/* Button */
-.btn                            { background: none; border: none; margin-bottom: 10px; }
+/* Buttons */
+.btn.upload-btn, .btn.remove-btn    { padding: 0; background: none; border: none; margin-bottom: 10px; }
 
 /* Crop Wrapper */
 .crop-preview                   { position: relative; display: block; max-width: 100%; border: 2px solid #000; background-image: linear-gradient(45deg, #808080 25%, transparent 25%), linear-gradient(-45deg, #808080 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #808080 75%), linear-gradient(-45deg, transparent 75%, #808080 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; user-select: none; transition: background .25s ease-in-out; }
@@ -35,3 +35,7 @@
 .crop-overlay .corner:nth-of-type(7) { right: -10px; }
 .crop-overlay .corner:nth-of-type(7),
 .crop-overlay .corner:nth-of-type(8) { bottom: -10px; }
+
+
+
+.preview-wrapper img            { display: block; max-width: 100%; }
