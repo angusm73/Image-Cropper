@@ -365,7 +365,7 @@ function Crop(options) {
         if (self.preview) {
             self.preview.classList.add('preview-wrapper');
         }
-        self.img_url = self.img_url ? self.img_url : 'test-image-1.png'
+        self.img_url = self.img_url ? self.img_url : 'test-image-2.png'
 
         generate_crop_template()
         bind_events()
