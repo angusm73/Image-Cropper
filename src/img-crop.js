@@ -78,6 +78,7 @@ function Crop(options) {
     function _side_click_start(e) {
         let index = Array.prototype.indexOf.call(e.target.parentElement.children, e.target) + 1
         moving_sides = [index]
+        _update_offset()
         document.addEventListener('mousemove', _anchor_drag, false)
         e.preventDefault()
         return false
@@ -86,6 +87,7 @@ function Crop(options) {
     function _corner_click_start(e) {
         let index = Array.prototype.indexOf.call(e.target.parentElement.children, e.target) - 3
         moving_sides = [index, index - 1 ? index - 1 : 4]
+        _update_offset()
         document.addEventListener('mousemove', _anchor_drag, false)
         e.preventDefault()
         return false
@@ -95,7 +97,7 @@ function Crop(options) {
         let old_area = JSON.parse(JSON.stringify(self.crop_area))
         // Left
         if (moving_sides.includes(4)) {
-            let _left = Math.max(e.pageX - self.preview_offset.left, 0)
+            let _left = Math.max(e.clientX - self.preview_offset.left, 0)
             self.crop_area.left = Math.round(_left)
             if (self.crop_area.left - (self.crop_area.width - old_area.width) > 0) {
                 self.crop_area.width -= self.crop_area.left - old_area.left
@@ -111,7 +113,7 @@ function Crop(options) {
         }
         // Top
         if (moving_sides.includes(1)) {
-            let _top = Math.max(e.pageY - self.preview_offset.top, 0)
+            let _top = Math.max(e.clientY - self.preview_offset.top, 0)
             self.crop_area.top = Math.round(_top)
             if (self.crop_area.top - (self.crop_area.height - old_area.height) > 0) {
                 self.crop_area.height -= self.crop_area.top - old_area.top
@@ -127,7 +129,7 @@ function Crop(options) {
         }
         // Right
         if (moving_sides.includes(2)) {
-            let _right = Math.max((self.preview_offset.left + preview_inner.clientWidth) - e.pageX, 0)
+            let _right = Math.max((self.preview_offset.left + preview_inner.clientWidth) - e.clientX, 0)
             self.crop_area.width = Math.round(preview_inner.clientWidth - self.crop_area.left - _right)
             if (options.ratio) {
                 self.crop_area.height = self.crop_area.width / options.ratio
@@ -135,7 +137,7 @@ function Crop(options) {
         }
         // Bottom
         if (moving_sides.includes(3)) {
-            let _bottom = Math.max((self.preview_offset.top + preview_inner.clientHeight) - e.pageY, 0)
+            let _bottom = Math.max((self.preview_offset.top + preview_inner.clientHeight) - e.clientY, 0)
             self.crop_area.height = Math.round(preview_inner.clientHeight - self.crop_area.top - _bottom)
             if (options.ratio) {
                 self.crop_area.width = self.crop_area.height * options.ratio
