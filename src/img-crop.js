@@ -196,7 +196,7 @@ function Crop(options) {
     }
 
     /* Fetch cropped image preview from server */
-    function _update_preview() {
+    self._update_preview = () => {
         /* Scale crop dimensions to real image size */
         let scale = img_el ? (img_el.naturalWidth / img_el.clientWidth) : 1,
             img_options = {
@@ -321,29 +321,48 @@ function Crop(options) {
         self.element.appendChild(form)
     }
 
+    function _mouseup() {
+        self.last_position = null
+        document.removeEventListener('mousemove', _anchor_drag, false)
+        document.removeEventListener('mousemove', _area_drag, false)
+        self._update_preview()
+    }
+
+    function _area_mousedown(e) {
+        if (!e.target.classList.contains('crop-overlay')) return
+        document.addEventListener('mousemove', _area_drag, false)
+    }
+
     /* Bind events */
     function bind_events() {
         img_el.addEventListener('load', _update_offset)
         img_el.addEventListener('load', _update_overlay)
-        img_el.addEventListener('load', _update_preview)
+        img_el.addEventListener('load', self._update_preview)
         upload_btn.addEventListener('click', self.choose_image, false)
         remove_btn.addEventListener('click', remove_preview, false)
         input.addEventListener('change', show_preview, false)
-        crop_overlay.addEventListener('mousedown', (e) => {
-            if (!e.target.classList.contains('crop-overlay')) return
-            document.addEventListener('mousemove', _area_drag, false)
-        }, false)
-        document.addEventListener('mouseup', () => {
-            self.last_position = null
-            document.removeEventListener('mousemove', _anchor_drag, false)
-            document.removeEventListener('mousemove', _area_drag, false)
-            _update_preview()
-        }, false)
+        crop_overlay.addEventListener('mousedown', _area_mousedown, false)
+        document.addEventListener('mouseup', _mouseup, false)
         window.addEventListener('resize', _throttle(() => {
             _update_offset()
-            _update_overlay()
+            self._update_overlay()
             self.last_position = null
         }, 50), false)
+    }
+
+    /* Destroy instance of Crop */
+    self.destroy = () => {
+        img_el.removeEventListener('load', _update_offset)
+        img_el.removeEventListener('load', _update_overlay)
+        img_el.removeEventListener('load', self._update_preview)
+        upload_btn.removeEventListener('click', self.choose_image)
+        remove_btn.removeEventListener('click', remove_preview)
+        input.removeEventListener('change', show_preview)
+        crop_overlay.removeEventListener('mousedown', _area_mousedown)
+        document.removeEventListener('mouseup', _mouseup)
+        Array.from(crop_overlay.children).forEach(el => {
+            el.removeEventListener('mousedown', el.classList.contains('side') ? _side_click_start : _corner_click_start)
+        })
     }
 
 

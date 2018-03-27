@@ -5,16 +5,18 @@ const gm = require('gm')
 function generate_image(options) {
     return new Promise(function (resolve, reject) {
         if (options.left === null) {
-            reject('Crop dimensions empty. Please provide left, top, width, height, img')
+            return reject('Crop dimensions empty. Please provide left, top, width, height, img')
         }
 
         /* Get image dimensions */
         gm(__dirname + '/uploads/' + options.img).size((err, size) => {
             if (err) {
-                reject(err)
+                return reject(err)
             }
 
             /* Constrain crop area to image dimensions */
+            options.left = Math.abs(options.left ? options.left : 0)
+            options.top = Math.abs(options.top ? options.top : 0)
             options.height = Math.abs(options.top + options.height <= size.height ? options.height : size.height - options.top)
             options.width = Math.abs(options.left + options.width <= size.width ? options.width : size.width - options.left)
 

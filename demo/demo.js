@@ -18,20 +18,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let demo_btn = document.getElementById('open-crop-modal')
     demo_btn.addEventListener('click', () => {
-        open_modal('<div id="crop-modal"></div><div id="crop-modal-preview"></div>', () => {
-            croppers.push(new Crop({
-                element: '#crop-modal',
-                preview: '#crop-modal-preview'
-            }))
-        })
+        let modal_cropper
+        open_modal(
+            '<div id="crop-modal"></div><div id="crop-modal-preview"></div>',
+            () => {
+                modal_cropper = new Crop({
+                    element: '#crop-modal',
+                    preview: '#crop-modal-preview'
+                })
+            },
+            () => {
+                modal_cropper.destroy()
+                modal_cropper = null
+            }
+        )
     })
 }, false)
 
 
 
 /* Modal js */
-var modal, overlay
-function open_modal(content, callback) {
+var modal, overlay, modal_close_cb
+function open_modal(content, callback, close_callback) {
     if (!modal) {
         create_modal()
     }
@@ -42,11 +50,17 @@ function open_modal(content, callback) {
     if (typeof callback === 'function') {
         callback()
     }
+    if (typeof close_callback === 'function') {
+        modal_close_cb = close_callback
+    }
 }
 
 function close_modal() {
     modal.classList.remove('open')
     overlay.classList.remove('open')
+    if (typeof modal_close_cb === 'function') {
+        modal_close_cb()
+    }
 }
 
 function create_modal() {
