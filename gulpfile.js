@@ -9,11 +9,9 @@ gulp.task('html', () => {
     // copy html -> dist/
     gulp.src('demo/**.htm')
         .pipe(gulp.dest('./dist'))
-        .pipe(server.notify())
     // copy images -> dist/
     gulp.src('src/imgs/**.svg')
         .pipe(gulp.dest('./dist/imgs'))
-        .pipe(server.notify())
 })
 
 gulp.task('css', () => {
@@ -21,20 +19,16 @@ gulp.task('css', () => {
     gulp.src(['src/img-crop.css', 'demo/demo.css'])
         .pipe(gulp.dest('./dist/css'))
         .pipe(gulp.dest('./dist/css'))
-        .pipe(server.notify())
 })
 
 gulp.task('js', () => {
     // transpile es6 down to normal js + move -> dist/
     gulp.src(['src/img-crop.js', 'demo/demo.js'])
         .pipe(sourcemaps.init())
-        .pipe(babel({
-            presets: ['env']
-        }))
+        .pipe(babel())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('./dist/js'))
         .pipe(gulp.dest('./dist/js'))
-        .pipe(server.notify())
 })
 
 gulp.task('build', () => {
@@ -42,10 +36,13 @@ gulp.task('build', () => {
 })
 
 gulp.task('watch', () => {
-    server.run(['demo/server.js'])
     gulp.watch('demo/**.htm', ['html'])
     gulp.watch(['src/**.css', 'demo/**.css'], ['css'])
     gulp.watch(['src/**.js', 'demo/**.js'], ['js'])
+    // server.run(['demo/server.js'])
+    // gulp.watch('*', file => {
+    //     server.notify.apply(server, [file])
+    // })
 })
 
 

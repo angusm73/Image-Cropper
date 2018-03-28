@@ -1,15 +1,8 @@
 const server = require('express')
-const livereload = require('connect-livereload')
 const bodyparser = require('body-parser')
 const fs = require('fs')
 const app = module.exports.app = exports.app = server()
 const http_port = 1337
-
-/* Setup livereloading */
-app.use(livereload({
-    basePath: '../dist',
-    port: 35729
-}))
 
 /* Parse request as url encoded data */
 app.use(bodyparser.urlencoded({

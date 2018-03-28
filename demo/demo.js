@@ -7,11 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
             element: '#crop1',
             preview: '#preview1',
             img: 'test-image-1.png',
+            ratio: 1,
             area: {
                 left: '10%',
                 top: '10%',
-                width: '80%',
-                height: '30%'
+                width: '30%'
             }
         })
     ]
