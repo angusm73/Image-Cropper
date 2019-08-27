@@ -6,22 +6,22 @@ const sourcemaps = require('gulp-sourcemaps')
 
 
 gulp.task('html', () => {
-    // copy html -> dist/
-    gulp.src('demo/**.htm')
-        .pipe(gulp.dest('./dist'))
     // copy images -> dist/
     gulp.src('src/imgs/**.svg')
         .pipe(gulp.dest('./dist/imgs'))
+    // copy html -> dist/
+    return gulp.src('demo/**.htm')
+        .pipe(gulp.dest('./dist'))
 })
 
-gulp.task('css', () => {
+gulp.task('css', () =>
     // copy css -> dist/
     gulp.src(['src/img-crop.css', 'demo/demo.css'])
         .pipe(gulp.dest('./dist/css'))
         .pipe(gulp.dest('./dist/css'))
-})
+)
 
-gulp.task('js', () => {
+gulp.task('js', () =>
     // transpile es6 down to normal js + move -> dist/
     gulp.src(['src/img-crop.js', 'demo/demo.js'])
         .pipe(sourcemaps.init())
@@ -29,24 +29,18 @@ gulp.task('js', () => {
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('./dist/js'))
         .pipe(gulp.dest('./dist/js'))
-})
+)
 
-gulp.task('build', () => {
-    gulp.run('html', 'css', 'js')
-})
+gulp.task('build', gulp.series('html', 'css', 'js'))
 
 gulp.task('watch', () => {
-    gulp.watch('demo/**.htm', ['html'])
-    gulp.watch(['src/**.css', 'demo/**.css'], ['css'])
-    gulp.watch(['src/**.js', 'demo/**.js'], ['js'])
+    gulp.watch('demo/**.htm', gulp.series('html'))
+    gulp.watch(['src/**.css', 'demo/**.css'], gulp.series('css'))
+    gulp.watch(['src/**.js', 'demo/**.js'], gulp.series('js'))
     // server.run(['demo/server.js'])
     // gulp.watch('*', file => {
     //     server.notify.apply(server, [file])
     // })
 })
 
-
-
-gulp.task('default', () => {
-    gulp.run('build', 'watch')
-})
+gulp.task('default', gulp.series('build', 'watch'))
